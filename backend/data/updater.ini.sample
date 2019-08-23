@@ -1,0 +1,29 @@
+[yourls-site]
+handler = yourls
+crypter = md5salt
+file = /yourls-directory/config.php
+
+[seeddms]
+handler = bdd
+crypter = md5
+bddtype = mysql
+bddhost = localhost
+bddname = seeddms
+bdduser = seeddmsbdduser
+bddpass = seeddmsbddpassword
+bddtable = tblUsers
+bdduserfield = login
+bddpassfield = pwd
+
+[cpanel]
+handler = cpanel
+adminuser = username
+adminpass = userpass
+adminurl = https://cpanel:2087
+domainname = example.tld
+authtype = password
+crypter = none
+
+[otherapp]
+handler = none
+crypter = none

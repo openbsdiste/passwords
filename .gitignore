@@ -1,0 +1,4 @@
+backend/data/reference.sqlite
+backend/data/backend.ini
+backend/handler/CPanel/*
+

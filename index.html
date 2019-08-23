@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Gestion du mot de passe</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Modification du mot de passe pour l'ensemble des applications du domaine">
+        <meta name="robots" content="index,nofollow,noodp" />
+        <link rel="canonical" href="http://passwords.localhost"/>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div id="title">
+            Mise &agrave; jour du mot de passe
+        </div>
+        <div id="messages">
+        </div>
+        <fieldset id="parameters">
+            <label for="username">Votre identifiant : </label><input id="username" size="64">
+            <label for="actualpass">Mot de passe actuel : </label><input id="actualpass" type="password" size="64">
+            <label for="newpass1">Nouveau mot de passe : </label><input id="newpass1" type="password" size="64">
+            <label for="newpass2">Nouveau mot de passe (contr&ocirc;le) : </label><input id="newpass2" type="password" size="64">
+            <button id="changepass">Mettre &agrave; jour mon mot de passe !</button>
+        </fieldset>
+        <div id="copyright">
+            &copy; 08/2019 - Fran&ccedil;ois Lecluse
+        </div>
+        <script type="text/javascript" src="jquery-3.4.1.min.js"></script>
+        <script type="text/javascript" src="script.js"></script>
+    </body>
+</html>
