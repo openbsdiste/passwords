@@ -1,0 +1,16 @@
+{
+    "headtitle": "Password handling",
+    "title": "Password updater",
+    "licenseurl" : "https://www.gnu.org/licenses/gpl-3.0.en.html",
+    "title": "Password updater",
+    "lusername" : "Login : ",
+    "lactualpass" : "Actual password : ",
+    "lnewpass1" : "New password : ",
+    "lnewpass2" : "New password (again) : ",
+    "changepass" : "Updating my password !",
+    "welcome" : "Welcome !",
+    "updatingpass" : "Updating your password in progress...",
+    "updateerror" : "Unknown error while updating your password...",
+    "unknownerror" : "Unknown error...",
+    "????": "Something goes wrong... but what ?"
+}

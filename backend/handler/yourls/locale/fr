@@ -1,0 +1,4 @@
+readerror = "Impossible de lire le fichier de configuration de yourls."
+usernotfound = "Impossible de trouver le mot de passe actuel de yourls."
+updateerror = "Erreur de mise &agrave; jour du fichier de configuration de yourls."
+writeerror = "Erreur d\'&eacute;criture du fichier de configuration de yourls."

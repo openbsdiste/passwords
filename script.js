@@ -16,41 +16,54 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 var Base = (function () {
-    function Base () {
+    function Base (isdebug) {
         this.pending = false;
-        this.debug = true;
+        this.debug = false;
+        if (isdebug !== undefined) {
+            this.debug = (isdebug) ? true : false;
+        }
     };
 
     Base.prototype.DisplayMessage = function (messagetodisplay, displaytime) {
         var that = this;
+        var mtd;
+
         if (displaytime === undefined) {
-            displaytime = 5000;
+            displaytime = 10000;
         }
         if (that.pending !== false) {
             clearTimeout (that.pending);
             that.pending = false;
             jQuery ('#messages').empty ();
         }
-        jQuery ('#messages').append (messagetodisplay);
+        mtd = i18n.__ (messagetodisplay);
+        if (mtd === undefined) {
+            mtd = messagetodisplay;
+        }
+        jQuery ('#messages').append (mtd);
         that.pending = setTimeout (function () { jQuery ('#messages').empty (); }, displaytime);
+        return that;
     };
 
     Base.prototype.ChangePass = function () {
         var that = this;
-        that.DisplayMessage ("Mise &agrave; jour de votre mot de passe...", 60000);
+
+        that.DisplayMessage ('updatingpass', 60000);
         jQuery.ajax ({
             url: 'update.php',
             data: {
                 format: 'json',
-                user: jQuery ('#username').val (),
+                user:   jQuery ('#username').val (),
                 actual: jQuery ('#actualpass').val (),
-                new1: jQuery ('#newpass1').val (),
-                new2: jQuery ('#newpass2').val ()
+                new1:   jQuery ('#newpass1').val (),
+                new2:   jQuery ('#newpass2').val (),
+                lang:   jQuery ("html").attr ('lang'),
+                dbg:    (that.debug) ? 1 : 0
             },
             type: 'POST',
             cache: false,
             error: function () {
-                that.DisplayMessage ("Erreur inconnue d'appel...", 10000);
+                that.DisplayMessage ("unknownerror");
             },
             success: function (data) {
                 try {
@@ -60,9 +73,9 @@ var Base = (function () {
                         jQuery ('#newpass1').val ('');
                         jQuery ('#newpass2').val ('');
                     }
-                    that.DisplayMessage (msgData.message, 6000);
+                    that.DisplayMessage (msgData.message);
                 } catch (e) {
-                    that.DisplayMessage ('Erreur inconnue lors de la mise &agrave; jour...', 10000);
+                    that.DisplayMessage ('updateerror');
                     if (that.debug) { jQuery ('body').empty ().append (data); }
                 }
             }
@@ -73,13 +86,21 @@ var Base = (function () {
         var that = this;
 
         jQuery ('#changepass').on ('click', function () { that.ChangePass (); });
+        return that;
 	};
 
     return Base;
 }) ();
 
 jQuery (document).ready (function () {
-    var base = new Base ();
-    base.Initialize ();
-    base.DisplayMessage ("Bienvenue !", 2000);
+    var tags = ['title', 'lusername', 'lactualpass', 'lnewpass1', 'lnewpass2', 'changepass'];
+
+    jQuery (document).attr ("title", i18n.__('headtitle'));
+    jQuery ('meta[name=description]').attr ('content', i18n.__('description'));
+    jQuery ('#title').append (i18n.__("title"));
+    jQuery ('#copyright a').last ().attr('href', i18n.__('licenseurl'));
+    for (var i in tags) {
+        jQuery ('#' + tags [i]).empty ().append (i18n.__(tags [i]));
+    }
+    new Base (true).Initialize ().DisplayMessage ('welcome', 4000);
 });

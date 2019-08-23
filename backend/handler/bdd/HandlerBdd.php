@@ -39,7 +39,7 @@
                     throw new Exception ('');
                 }
             } catch (Exception $e) {
-                throw new Exception ('Erreur de r&eacute;cup&eacute;ration pour le gestionnaire : ' . $configurator);
+                throw new Exception ('handler.bdd.oldpass');
             }
             return $crypted;
         }
@@ -58,7 +58,7 @@
                     throw new Exception ('');
                 }
             } catch (Exception $e) {
-                throw new Exception ('Erreur de mise &eacute; jour pour le gestionnaire : ' . $configurator);
+                throw new Exception ('handler.bdd.newpass');
             }
         }
     }

@@ -1,0 +1,2 @@
+oldpass = "Error while reading actual password from bdd handler"
+newpass = "Error while updating password into bdd handler"

@@ -1,0 +1,4 @@
+readerror = "Unable to read configuration file of yourls"
+usernotfound = "Unable to find your actual password for yourls"
+updateerror = "Error while updating yourls configuration"
+writeerror = "Error while writing yourls configuration file"

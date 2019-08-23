@@ -23,7 +23,7 @@
         public function testOptions ($configurator, $options) {
             foreach ($this->_fields as $field) {
                 if (! isset ($options [$field])) {
-                    throw new Exception ($configurator . ' : configuration de ' . $field . 'n&eacute;c&eacute;ssaire.');
+                    throw new Exception ('handler_need_config');
                 }
             }
         }

@@ -24,7 +24,7 @@
             $crypted = $actual;
             $configfile = file_get_contents ($options ['file']);
             if ($configfile == false) {
-                throw new Exception ($configurator . ' : impossible de lire le fichier.');
+                throw new Exception ('handler.yourls.readerror');
             }
             $quotes = "'" . '"';
 			$pattern = "/[$quotes]${user}[$quotes]\s*=>\s*[$quotes](.*)[$quotes]/";
@@ -33,27 +33,24 @@
             if (count ($matches) == 2) {
                 $crypted = $matches [1][0];
             } else {
-                throw new Exception ($configurator . ' : impossible de trouver le mot de passe actuel.');
+                throw new Exception ('handler.yourls.usernotfound');
             }
             return $crypted;
         }
 
         public function handle ($user, $crypted, $new, $configurator, $options) {
             $configfile = file_get_contents ($options ['file']);
-            if ($configfile == false) {
-                throw new Exception ($configurator . ' : impossible de lire le fichier.');
-            }
             $count = 0;
             $quotes = "'" . '"';
 			$pattern = "/[$quotes]${user}[$quotes]\s*=>\s*[$quotes].*[$quotes]/";
 			$replace = "'$user' => 'md5:$new'";
 			$configdata = preg_replace ($pattern, $replace, $configfile, -1, $count);
             if ($count != 1) {
-                throw new Exception ($configurator . ' : erreur de mise &agrave; jour.');
+                throw new Exception ('handler.yourls.updateerror');
             }
             $success = file_put_contents ($options ['file'], $configdata);
         	if ($success === FALSE) {
-                throw new Exception ($configurator . ' : erreur d\'&eacute;criture du fichier.');
+                throw new Exception ('handler.yourls.writeerror');
         	}
         }
     }

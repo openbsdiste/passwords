@@ -17,7 +17,8 @@
         along with this program.  If not, see <https://www.gnu.org/licenses/>.
     */
 
-    define ('ROOT', __DIR__ . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR);
+    defined ('DS') || define ('DS', DIRECTORY_SEPARATOR);
+    define ('ROOT', __DIR__ . DS . 'data' . DS);
     define ('CONFIGURATION_FILE', ROOT . 'updater.ini');
     define ('REFERENCE_DATABASE', ROOT . 'reference.sqlite');
     define ('LOCKFILE', ROOT . 'lock.lock');
@@ -25,72 +26,88 @@
     define ('USERNAME_REGEX', '/^[a-z]+([_-]?[a-z])*\.[a-z]+([_-]?[a-z])*[0-9]?$/');
     define ('PASSWORD_REGEX', '/(?=^.{12,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/');
 
-    require_once (__DIR__ . DIRECTORY_SEPARATOR . 'HandlerAbstract.php');
-    require_once (__DIR__ . DIRECTORY_SEPARATOR . 'CrypterAbstract.php');
+    require_once (__DIR__ . DS . 'HandlerAbstract.php');
+    require_once (__DIR__ . DS . 'CrypterAbstract.php');
 
     class Updater {
         protected $_user, $_actual, $_new, $_newbis;
         protected $_configuration;
         protected $_handlers = array ();
         protected $_crypters = array ();
+        protected $_debug;
+        protected $_lang;
+
+        protected function _translate ($message) {
+            $table = explode ('.', $message);
+            $message = array_pop ($table);
+            $dirname = __DIR__ . DS . implode (DS, $table);
+            $filename = $dirname . DS . 'locale' . DS . $this->_lang;
+            if (is_readable ($filename)) {
+                $messages = parse_ini_file ($filename, false, INI_SCANNER_RAW);
+                if (isset ($messages [$message])) {
+                    $message = $messages [$message];
+                }
+            }
+            return $message;
+        }
 
         protected function _checkActual () {
             if (! preg_match (USERNAME_REGEX, $this->_user)) {
-                throw new Exception ('Votre identifiant ne peut &ecirc;tre celui saisi car il est invalide.');
+                throw new Exception ('invalid_identifier');
             }
             if (! preg_match (PASSWORD_REGEX, $this->_actual)) {
-                throw new Exception ('Le mot de passe actuel ne respecte pas les r&egrave;gles. Il est donc incorrect.');
+                throw new Exception ('invalid_password');
             }
         }
 
         protected function _checkNew () {
             if ($this->_actual == $this->_new) {
-                throw new Exception ('L\'ancien mot de passe et le nouveau sont identiques. Rien &agrave; changer.');
+                throw new Exception ('identical_passwords');
             }
             if ($this->_new != trim ($this->_new)) {
-                throw new Exception ('Le nouveau mot de passe ne peut commencer ni finir par un espace.');
+                throw new Exception ('newpass_space');
             }
             if ($this->_new != $this->_newbis) {
-                throw new Exception ('Le nouveau mot de passe diff&egrave;re du contr&ocirc;le.');
+                throw new Exception ('newpass_not_equals');
             }
             if (! preg_match (PASSWORD_REGEX, $this->_new)) {
-                throw new Exception ('Nouveau mot de passe : 12 carat&egrave;res mini dont 1 maj, 1 min, 1 chiffre ou sp&eacute;cial.');
+                throw new Exception ('newpass_invalid');
             }
         }
 
         protected function _loadConfiguration () {
             if (! is_readable (CONFIGURATION_FILE)) {
-                throw new Exception ('Probl&egrave;me technique : Impossible de lire la configuration.');
+                throw new Exception ('config_not_readable');
             }
             $this->_configuration = parse_ini_file (CONFIGURATION_FILE, true, INI_SCANNER_RAW);
             foreach ($this->_configuration as $configurator => $entry) {
                 if ( ! is_array ($entry) || ! isset ($entry ['handler']) || ! isset ($entry ['crypter'])) {
-                    throw new Exception ('Probl&egrave;me technique : Fichier de configuration invalide. Configurateur : ' . $configurator);
+                    throw new Exception ('invalid_configurator');
                 }
 
-                if (! is_readable (__DIR__ . DIRECTORY_SEPARATOR . "handler" . DIRECTORY_SEPARATOR . "Handler" . ucfirst ($entry ['handler']) . ".php")) {
-                    throw new Exception ('Probl&egrave;me technique : Gestionnaire configur&eacute; innexistant : ' . $entry ['handler'] . '.');
+                $className = "Handler" . ucfirst ($entry ['handler']);
+                if (! is_readable (__DIR__ . DS . "handler" . DS . $entry ['handler'] . DS . $className . ".php")) {
+                    throw new Exception ('invalid_handler' . $entry ['handler'] . '.');
                 }
                 if (! isset ($this->_handlers [$entry ['handler']])) {
-                    $className = "Handler" . ucfirst ($entry ['handler']);
-                    require_once (__DIR__ . DIRECTORY_SEPARATOR . "handler" . DIRECTORY_SEPARATOR . $className . ".php");
+                    require_once (__DIR__ . DS . "handler" . DS . $entry ['handler'] . DS . $className . ".php");
                     $h = new $className ();
                     if (! $h instanceof HandlerAbstract) {
-                        throw new Exception ('Probl&egrave;me technique : Gestionnaire ' . $className . ' invalide.');
+                        throw new Exception ('handler_error');
                     }
                     $this->_handlers [$entry ['handler']] = $h;
                 }
                 $this->_handlers [$entry ['handler']]->testOptions ($configurator, $entry);
 
-                if (! is_readable (__DIR__ . DIRECTORY_SEPARATOR . "crypter" . DIRECTORY_SEPARATOR . "Crypter" . ucfirst ($entry ['crypter']) . ".php")) {
-                    throw new Exception ('Probl&egrave;me technique : Crypteur configur&eacute; innexistant : ' . $entry ['crypter'] . '.');
+                $className = "Crypter" . ucfirst ($entry ['crypter']);
+                if (! is_readable (__DIR__ . DS . "crypter" . DS . $entry ['crypter'] . DS . $className . ".php")) {
+                    throw new Exception ('innexistant_crypter');
                 }
                 if (! isset ($this->_crypters [$entry ['crypter']])) {
-                    $className = "Crypter" . ucfirst ($entry ['crypter']);
-                    require_once (__DIR__ . DIRECTORY_SEPARATOR . "crypter" . DIRECTORY_SEPARATOR . $className . ".php");
+                    require_once (__DIR__ . DS . "crypter" . DS . $entry ['crypter'] . DS . $className . ".php");
                     $c = new $className ();
                     if (! $c instanceof CrypterAbstract) {
-                        throw new Exception ('Probl&egrave;me technique : Crypteur ' . $className . ' invalide.');
+                        throw new Exception ('invalid_crypter');
                     }
                     $this->_crypters [$entry ['crypter']] = $c;
                 }
@@ -101,7 +118,7 @@
         protected function _checkActualUserAndPassValidity () {
             $resut = false;
             if (! is_readable (REFERENCE_DATABASE)) {
-                throw new Exception ('Probl&egrave;me technique : Base de r&eacute;f&eacute;rence introuvable.');
+                throw new Exception ('ref_not_found');
             }
             try {
                 $pdo = new PDO ('sqlite:' . REFERENCE_DATABASE);
@@ -115,10 +132,10 @@
                     }
                 }
             } catch (Exception $e) {
-                throw new Exception ('Probl&egrave;me technique lors de l\'acces &agrave; la base de r&eacute;f&eacute;rence.');
+                throw new Exception ('ref_invalid');
             }
             if (! $result) {
-                throw new Exception ('Identifiant et/ou mot de passe actuel invalide(s).');
+                throw new Exception ('invalid_login_pass');
             }
         }
 
@@ -126,10 +143,10 @@
             $mtime = @filemtime (LOCKFILE);
             if (! $mtime || (time () - $mtime > MAXTIME)) {
                 if (! touch (LOCKFILE)) {
-                    throw new Exception ('Probl&egrave;me technique : Impossible de cr&eacute;er le fichier de v&eacute;rrouillage.');
+                    throw new Exception ('create_lock');
                 }
             } else {
-                throw new Exception ('Une autre modification est en cours. Patientez quelques secondes et r&eacute;essayez.');
+                throw new Exception ('lock_exists');
             }
         }
 
@@ -153,7 +170,7 @@
                     throw new Exception ('pwet');
                 }
             } catch (Exception $e) {
-                throw new Exception ('Probl&egrave;me technique lors de la mise &agrave; jour de la base de r&eacute;f&eacute;rence.');
+                throw new Exception ('update_ref');
             }
         }
 
@@ -161,7 +178,9 @@
             @unlink (LOCKFILE);
         }
 
-        public function __construct ($user, $actual, $new1, $new2) {
+        public function __construct ($lang, $debug, $user, $actual, $new1, $new2) {
+            $this->_debug = $debug;
+            $this->_lang = $lang;
             $this->_user = strtolower (trim ($user));
             $this->_actual = trim ($actual);
             $this->_new = $new1;
@@ -170,20 +189,25 @@
 
         public function run (&$message) {
             $ok = false;
+            $locked = false;
             try {
                 $this->_checkActual ();
                 $this->_checkNew ();
                 $this->_loadConfiguration ();
                 $this->_checkActualUserAndPassValidity ();
                 $this->_lockAccess ();
+                $locked = true;
                 $this->_updatePasswordEverywhere ();
                 $this->_updateActualUserAndPass ();
-                $this->_unlockAccess ();
                 $ok = true;
-                $message = "Mise &agrave; jour du mot de passe termin&eacute;e. Merci.";
+                $message = "end_ok";
             } catch (Exception $e) {
                 $message = $e->getMessage ();
             }
+            if ($locked) {
+                $this->_unlockAccess (); 
+            }
+            $message = $this->_translate ($message);
             return $ok;
         }
     }

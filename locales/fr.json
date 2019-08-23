@@ -1,0 +1,16 @@
+{
+    "headtitle": "Gestion du mot de passe",
+    "licenseurl" : "https://www.gnu.org/licenses/gpl-3.0.fr.html",
+    "description": "Modification du mot de passe pour l'ensemble des applications du domaine",
+    "title": "Mise &agrave; jour du mot de passe",
+    "lusername" : "Votre identifiant : ",
+    "lactualpass" : "Mot de passe actuel : ",
+    "lnewpass1" : "Nouveau mot de passe : ",
+    "lnewpass2" : "Nouveau mot de passe (contr&ocirc;le) : ",
+    "changepass" : "Mettre &agrave; jour mon mot de passe !",
+    "welcome" : "Bienvenue !",
+    "updatingpass" : "Mise &agrave; jour de votre mot de passe...",
+    "updateerror" : "Erreur inconnue lors de la mise &agrave; jour...",
+    "unknownerror" : "Erreur inconnue d'appel...",
+    "????": "Quelque chose ne va pas... mais quoi ?"
+}
