@@ -1,3 +1,3 @@
 backend/data/reference.sqlite
-backend/data/backend.ini
+backend/data/updater.ini
 backend/handler/cpanel/CPanel/*
