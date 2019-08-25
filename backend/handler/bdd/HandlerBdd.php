@@ -55,9 +55,8 @@
                     ' set `' . $options ['bddpassfield'] . '` = :pass' .
                     ' where `' . $options ['bdduserfield'] . '` = :user'
                 );
-                $sth->execute (array (':user' => $user, ':pass' => $new));
-                if (! $sth->rowCount ()) {
-                    throw new Exception ('');
+                if (! $sth->execute (array (':user' => $user, ':pass' => $new))) {
+                    throw new Exception (implode (' - ', $sth->errorInfo()));
                 }
             } catch (Exception $e) {
                 throw new Exception ('handler.bdd.newpass');
