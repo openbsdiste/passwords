@@ -20,10 +20,11 @@
         along with this program.  If not, see <https://www.gnu.org/licenses/>.
     */
 
-    define ('DS', DIRECTORY_SEPARATOR);
-    define ('REFERENCE_DATABASE', dirname (__FILE__) . DS . 'data' . DS . 'reference.sqlite');
-    define ('USERNAME_REGEX', '/^[a-z]+([_-]?[a-z])*\.[a-z]+([_-]?[a-z])*[0-9]?$/');
-    define ('PASSWORD_REGEX', '/(?=^.{12,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/');
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+
+    require_once "Updater.php";
+
     $sql = "CREATE TABLE 'users' ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 'username' TEXT NOT NULL, 'password' TEXT NOT NULL)";
     $lang = 'fr';
     $messages = array ();
@@ -69,11 +70,13 @@
             $pass = password_hash ($argv [3], PASSWORD_DEFAULT);
         } elseif (($argc == 2) && ($argv [1] == 'list')) {
             $action = 'list';
-        } elseif (($argc == 4) && ($argv [1] == 'forcepwd')) {
-            $section = 'force';
+        } elseif (($argc == 3) && ($argv [1] == 'forcepwd')) {
+            $action = 'force';
             $user = $argv [2];
-            $passtmp = password_hash ($argv [3] . '-temp', PASSWORD_DEFAULT);
-            $pass = password_hash ($argv [3], PASSWORD_DEFAULT);
+        } elseif (($argc == 4) && ($argv [1] == 'forcepwd')) {
+            $action = 'force';
+            $user = $argv [2];
+            $pass = $argv [3];
         } else {
             $ok = translate ('cli_usage', $lang) . " : " . $argv [0] . " " .translate ('cli_args', $lang);
         }
@@ -117,10 +120,10 @@
                 }
                 break;
             case 'force':
-                require_once 'Updater.php';
-                if (user == '_ALL_') {
+                $passtmp = $pass . '-tmp';
+                if ($user == 'ALL') {
                     $sth = $pdo->prepare ('update `users` set `password`=:pass');
-                    $sth->execute (array ('user' => $user, 'pass' => $passtmp));
+                    $sth->execute (array ('user' => $user, 'pass' => password_hash ($passtmp, PASSWORD_DEFAULT)));
                     $sth = $pdo->prepare ('select `username` from `users` order by `username` ASC');
                     $sth->execute (array ());
                     $list = $sth->fetchAll (PDO::FETCH_ASSOC);
@@ -131,7 +134,7 @@
                     }
                 } else {
                     $sth = $pdo->prepare ('update `users` set `password`=:pass where `username`=:user');
-                    $sth->execute (array ('user' => $user, 'pass' => $passtmp));
+                    $sth->execute (array ('user' => $user, 'pass' => password_hash ($passtmp, PASSWORD_DEFAULT)));
                     echo "\t- " . $user . PHP_EOL;
                     $updater = new Updater ('fr', false, $user, $passtmp, $pass, $pass);
                     $updater->run ($message);

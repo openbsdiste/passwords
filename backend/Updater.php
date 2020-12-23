@@ -118,7 +118,7 @@
         }
 
         protected function _checkActualUserAndPassValidity () {
-            $resut = false;
+            $result = false;
             if (! is_readable (REFERENCE_DATABASE)) {
                 throw new Exception ('ref_not_found');
             }
