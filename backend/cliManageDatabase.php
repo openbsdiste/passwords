@@ -72,7 +72,7 @@
         } elseif (($argc == 4) && ($argv [1] == 'forcepwd')) {
             $section = 'force';
             $user = $argv [2];
-            $passtmp = password_hash ($argv [3] . '-temp', PASSWORD_DEFAULT . '-temp');
+            $passtmp = password_hash ($argv [3] . '-temp', PASSWORD_DEFAULT);
             $pass = password_hash ($argv [3], PASSWORD_DEFAULT);
         } else {
             $ok = translate ('cli_usage', $lang) . " : " . $argv [0] . " " .translate ('cli_args', $lang);
