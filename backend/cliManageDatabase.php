@@ -44,7 +44,7 @@
     }
 
     function showLicense ($lang) {
-        echo "Passwords  Copyright (C) 2019  François Lecluse" . PHP_EOL;
+        echo "Passwords  Copyright (C) 2019-2020  François Lecluse" . PHP_EOL;
         echo translate ('cli_license1', $lang) . PHP_EOL;
         echo translate ('cli_license2', $lang) . PHP_EOL;
         echo translate ('cli_license3', $lang) . PHP_EOL;
@@ -69,6 +69,11 @@
             $pass = password_hash ($argv [3], PASSWORD_DEFAULT);
         } elseif (($argc == 2) && ($argv [1] == 'list')) {
             $action = 'list';
+        } elseif (($argc == 4) && ($argv [1] == 'forcepwd')) {
+            $section = 'force';
+            $user = $argv [2];
+            $passtmp = password_hash ($argv [3] . '-temp', PASSWORD_DEFAULT . '-temp');
+            $pass = password_hash ($argv [3], PASSWORD_DEFAULT);
         } else {
             $ok = translate ('cli_usage', $lang) . " : " . $argv [0] . " " .translate ('cli_args', $lang);
         }
@@ -109,6 +114,27 @@
                 $list = $sth->fetchAll (PDO::FETCH_ASSOC);
                 foreach ($list as $el) {
                     echo "\t- " . $el ['username'] . PHP_EOL;
+                }
+                break;
+            case 'force':
+                require_once 'Updater.php';
+                if (user == '_ALL_') {
+                    $sth = $pdo->prepare ('update `users` set `password`=:pass');
+                    $sth->execute (array ('user' => $user, 'pass' => $passtmp));
+                    $sth = $pdo->prepare ('select `username` from `users` order by `username` ASC');
+                    $sth->execute (array ());
+                    $list = $sth->fetchAll (PDO::FETCH_ASSOC);
+                    foreach ($list as $el) {
+                        echo "\t- " . $el ['username'] . PHP_EOL;
+                        $updater = new Updater ('fr', false, $el ['username'], $passtmp, $pass, $pass);
+                        $updater->run ($message);
+                    }
+                } else {
+                    $sth = $pdo->prepare ('update `users` set `password`=:pass where `username`=:user');
+                    $sth->execute (array ('user' => $user, 'pass' => $passtmp));
+                    echo "\t- " . $user . PHP_EOL;
+                    $updater = new Updater ('fr', false, $user, $passtmp, $pass, $pass);
+                    $updater->run ($message);
                 }
                 break;
         }
